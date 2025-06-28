@@ -349,21 +349,21 @@ For more sophisticated relevance calculation, search engines typically use **TF-
 Measures how frequently a term appears in a document:
 
 \[
-TF(t,d) = \frac{\text{Number of times term } t \text{ appears in document } d}{\text{Total number of terms in document } d}
+\text{TF}(t,d) = \frac{\text{Number of times term } t \text{ appears in document } d}{\text{Total number of terms in document } d}
 \]
 
 ### Inverse Document Frequency (IDF)
 Measures how rare a term is across the entire corpus:
 
 \[
-IDF(t) = \log\left(\frac{\text{Total number of documents}}{\text{Number of documents containing term } t}\right)
+\text{IDF}(t) = \log\left(\frac{\text{Total number of documents}}{\text{Number of documents containing term } t}\right)
 \]
 
 ### TF-IDF Score
 Combines both metrics:
 
 \[
-\text{TF-IDF}(t,d) = TF(t,d) \times IDF(t)
+\text{TF-IDF}(t,d) = \text{TF}(t,d) \times \text{IDF}(t)
 \]
 
 ### Example TF-IDF Calculation
