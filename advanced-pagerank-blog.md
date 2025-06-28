@@ -618,3 +618,35 @@ print("PageRank scores:", pagerank_scores)
 ```
 
 This mathematical exploration reveals PageRank as far more than a search algorithm—it represents a fundamental breakthrough in using linear algebra to extract meaning from network structure, with applications spanning academic citation analysis to social media influence measurement[30][32]. The algorithm's enduring relevance demonstrates the power of mathematical theory in solving complex computational challenges at unprecedented scale[33][36].
+
+## References
+
+1. Page, L., Brin, S., Motwani, R., & Winograd, T. (1999). *The PageRank Citation Ranking: Bringing Order to the Web*. Stanford InfoLab Technical Report.  
+   *[This is the seminal paper that introduced the PageRank algorithm. It is referenced in most discussions of web search and PageRank theory.]*
+
+2. Langville, A. N., & Meyer, C. D. (2012). *Google’s PageRank and Beyond: The Science of Search Engine Rankings*. Princeton University Press.  
+   *[This book provides a comprehensive mathematical overview of PageRank and related algorithms.]*
+
+3. Brin, S., & Page, L. (1998). *The Anatomy of a Large-Scale Hypertextual Web Search Engine*. In *Proceedings of the 7th International World Wide Web Conference (WWW7)*, 107–117.  
+   *[This paper gives the foundational technical details behind Google’s early search engine.]*
+
+4. Meyer, C. D. (2000). *Matrix Analysis and Applied Linear Algebra*. Society for Industrial and Applied Mathematics (SIAM).  
+   *[Used for the linear algebra and matrix theory underpinnings of PageRank.]*
+
+5. Golub, G. H., & Van Loan, C. F. (2013). *Matrix Computations*. Johns Hopkins University Press.  
+   *[A standard reference for matrix computations and eigenvalue problems.]*
+
+6. Haveliwala, T. H. (2002). *Topic-Sensitive PageRank*. In *Proceedings of the 11th International World Wide Web Conference (WWW2002)*, 517–526.  
+   *[Discusses personalized PageRank and its applications.]*
+
+7. Manning, C. D., Raghavan, P., & Schütze, H. (2008). *Introduction to Information Retrieval*. Cambridge University Press.  
+   *[Standard reference for information retrieval, including TF-IDF and BM25.]*
+
+8. Robertson, S., & Zaragoza, H. (2009). *The Probabilistic Relevance Framework: BM25 and Beyond*. *Foundations and Trends in Information Retrieval*, 3(4), 333–389.  
+   *[Details on BM25 and advanced relevance scoring.]*
+
+9. Meyer, C. D. (1989). *Stochastic Complementarity, Uncoupling Markov Chains, and the Theory of Nearly Reducible Systems*. *SIAM Review*, 31(2), 240–272.  
+   *[Background on Markov chains and irreducibility.]*
+
+10. Seneta, E. (2006). *Non-negative Matrices and Markov Chains*. Springer Series in Statistics.  
+    *[For Perron-Frobenius theory and stochastic matrices.]*
