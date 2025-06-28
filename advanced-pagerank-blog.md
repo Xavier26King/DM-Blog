@@ -240,6 +240,265 @@ Here **PageRank is decisive**: pages D and E tie on keywords, but D outranks E t
 
 Even on a six-node toy graph, PageRank captures *global structural signals* that keyword statistics alone cannot.  It rewards pages plugged into reputable neighborhoods and penalizes orphan or spam pages, illustrating **the dual lens of topicality and authority** that underpins modern search[20][22].
 
+# Calculating Keyword Relevance Scores (k): The Text Matching Component
+
+## Understanding the 'k' Score in Search Engines
+
+In the PageRank example, we saw how search results combine **content relevance** (k) with **link authority** (PageRank) using the formula:
+
+\[
+S = 0.6 \times k + 0.4 \times r
+\]
+
+But how exactly is the keyword relevance score **k** calculated? This section explains the mathematical foundations behind text matching and relevance scoring used in modern search engines.
+
+---
+
+## Text Preprocessing: The Foundation
+
+Before any relevance calculation can begin, both the search query and document content must be preprocessed to create a standardized, comparable format. This involves several critical steps:
+
+### 1. Tokenization
+Breaking text into individual words (tokens):
+```
+"Python Tutorial Hub" → ["Python", "Tutorial", "Hub"]
+```
+
+### 2. Case Normalization
+Converting all text to lowercase for consistent matching:
+```
+["Python", "Tutorial", "Hub"] → ["python", "tutorial", "hub"]
+```
+
+### 3. Stopword Removal
+Eliminating common words that carry little semantic meaning:
+```
+"Learn Python programming with the best guide" 
+→ ["learn", "python", "programming", "best", "guide"]
+```
+Common stopwords: *the, and, or, but, in, on, at, to, for, of, with, by, a, an, is, are, was, were*
+
+### 4. Stemming/Lemmatization
+Reducing words to their root forms:
+- **Stemming**: `running, runs, ran → run`
+- **Lemmatization**: `better → good, mice → mouse`
+
+---
+
+## Simple Keyword Matching (Used in Our Example)
+
+The cleanest approach, which produces the exact k values shown in our PageRank example, uses **proportional keyword matching**:
+
+### Algorithm
+```python
+def calculate_k_score(query, document):
+    # 1. Preprocess both query and document
+    query_words = set(preprocess(query))
+    doc_words = set(preprocess(document))
+    
+    # 2. Find intersection of words
+    matched_words = query_words ∩ doc_words
+    
+    # 3. Calculate match ratio
+    match_ratio = len(matched_words) / len(query_words)
+    
+    # 4. Convert to discrete scores
+    if match_ratio >= 1.0:
+        return 1.000  # Perfect match (all query words found)
+    elif match_ratio >= 0.5:
+        return 0.500  # Partial match (some query words found)
+    else:
+        return 0.000  # Poor match (few/no query words found)
+```
+
+### Example Calculations
+
+**Query: "python tutorial"**
+- Query words: `{python, tutorial}`
+- Total query words: 2
+
+| Page | Document Content | Matched Words | Ratio | k Score |
+|------|------------------|---------------|-------|---------|
+| A | Python Tutorial Hub... | `{python, tutorial}` | 2/2 = 1.0 | **1.000** |
+| B | Basic Python Guide... | `{python}` | 1/2 = 0.5 | **0.500** |
+| C | Advanced Python... | `{python}` | 1/2 = 0.5 | **0.500** |
+| D | Data Science Blog... | `{python}` | 1/2 = 0.5 | **0.500** |
+| E | ML Algorithms... | `{}` | 0/2 = 0.0 | **0.000** |
+| F | Random Blog... | `{}` | 0/2 = 0.0 | **0.000** |
+
+**Query: "machine learning"**
+- Query words: `{machine, learning}`
+- Total query words: 2
+
+| Page | Document Content | Matched Words | Ratio | k Score |
+|------|------------------|---------------|-------|---------|
+| A | Python Tutorial Hub... | `{}` | 0/2 = 0.0 | **0.000** |
+| B | Basic Python Guide... | `{}` | 0/2 = 0.0 | **0.000** |
+| C | Advanced Python... | `{}` | 0/2 = 0.0 | **0.000** |
+| D | Data Science Blog... | `{machine, learning}` | 2/2 = 1.0 | **1.000** |
+| E | ML Algorithms... | `{machine, learning}` | 2/2 = 1.0 | **1.000** |
+| F | Random Blog... | `{}` | 0/2 = 0.0 | **0.000** |
+
+---
+
+## Advanced Relevance Scoring: TF-IDF
+
+For more sophisticated relevance calculation, search engines typically use **TF-IDF** (Term Frequency-Inverse Document Frequency), which considers both how often terms appear and how rare they are across the corpus.
+
+### Term Frequency (TF)
+Measures how frequently a term appears in a document:
+
+\[
+TF(t,d) = \frac{\text{Number of times term } t \text{ appears in document } d}{\text{Total number of terms in document } d}
+\]
+
+### Inverse Document Frequency (IDF)
+Measures how rare a term is across the entire corpus:
+
+\[
+IDF(t) = \log\left(\frac{\text{Total number of documents}}{\text{Number of documents containing term } t}\right)
+\]
+
+### TF-IDF Score
+Combines both metrics:
+
+\[
+\text{TF-IDF}(t,d) = TF(t,d) \times IDF(t)
+\]
+
+### Example TF-IDF Calculation
+
+For our 6-page corpus and the term "tutorial":
+
+**Term Frequency:**
+- Page A: "tutorial" appears 1 time in 10 words → TF = 1/10 = 0.100
+- Pages B-F: "tutorial" appears 0 times → TF = 0.000
+
+**Inverse Document Frequency:**
+- Total documents: 6
+- Documents containing "tutorial": 1 (only Page A)
+- IDF = log(6/1) = log(6) ≈ 1.792
+
+**TF-IDF Scores:**
+- Page A: 0.100 × 1.792 = **0.179**
+- Pages B-F: 0.000 × 1.792 = **0.000**
+
+**Final Query Score:**
+For query "python tutorial" against Page A:
+- "python": TF-IDF = 0.081
+- "tutorial": TF-IDF = 0.179
+- **Combined score = (0.081 + 0.179) / 2 = 0.130**
+
+---
+
+## Modern Search Engine Enhancements
+
+### 1. BM25 Algorithm
+An improvement over TF-IDF that addresses document length bias:
+
+\[
+\text{BM25}(t,d) = IDF(t) \times \frac{TF(t,d) \times (k_1 + 1)}{TF(t,d) + k_1 \times (1 - b + b \times \frac{|d|}{avgdl})}
+\]
+
+Where:
+- k₁ controls term frequency saturation (typically 1.2-2.0)
+- b controls length normalization (typically 0.75)
+- |d| is document length, avgdl is average document length
+
+### 2. Semantic Matching
+Modern systems use vector embeddings to match semantically similar terms:
+- "car" matches "automobile"
+- "ML" matches "machine learning"
+- "AI" matches "artificial intelligence"
+
+### 3. Query Expansion
+Search engines expand queries with synonyms and related terms:
+- Query: "python programming"
+- Expanded: "python programming coding development scripting"
+
+### 4. Field Weighting
+Different document sections receive different importance weights:
+- Title: 3.0× weight
+- Headings: 2.0× weight
+- Body text: 1.0× weight
+- Meta tags: 0.5× weight
+
+---
+
+## Practical Implementation
+
+Here's a complete Python implementation of keyword relevance scoring:
+
+```python
+import re
+import math
+from collections import Counter
+
+def preprocess_text(text):
+    """Basic text preprocessing"""
+    # Convert to lowercase and extract words
+    words = re.findall(r'\b[a-z]+\b', text.lower())
+    
+    # Remove stopwords
+    stopwords = {'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'}
+    return [w for w in words if w not in stopwords]
+
+def calculate_tfidf(documents):
+    """Calculate TF-IDF scores for all documents"""
+    # Preprocess all documents
+    processed_docs = {doc_id: preprocess_text(text) for doc_id, text in documents.items()}
+    
+    # Calculate TF scores
+    tf_scores = {}
+    for doc_id, words in processed_docs.items():
+        word_count = Counter(words)
+        total_words = len(words)
+        tf_scores[doc_id] = {word: count/total_words for word, count in word_count.items()}
+    
+    # Calculate IDF scores
+    total_docs = len(documents)
+    all_words = set(word for words in processed_docs.values() for word in words)
+    idf_scores = {}
+    for word in all_words:
+        docs_containing = sum(1 for words in processed_docs.values() if word in words)
+        idf_scores[word] = math.log(total_docs / docs_containing)
+    
+    # Calculate TF-IDF scores
+    tfidf_scores = {}
+    for doc_id in documents:
+        tfidf_scores[doc_id] = {}
+        for word in tf_scores[doc_id]:
+            tfidf_scores[doc_id][word] = tf_scores[doc_id][word] * idf_scores[word]
+    
+    return tfidf_scores
+
+def query_relevance(query, doc_tfidf):
+    """Calculate relevance score for a query against a document"""
+    query_words = preprocess_text(query)
+    
+    # Sum TF-IDF scores for all query words found in document
+    total_score = sum(doc_tfidf.get(word, 0) for word in query_words)
+    
+    # Normalize by query length
+    return total_score / len(query_words) if query_words else 0
+```
+
+---
+
+## From Toy Example to Google Scale
+
+While our 6-page example uses simple keyword matching, Google's production system scales these principles to billions of pages using:
+
+1. **Distributed Computing**: TF-IDF calculations across massive server clusters
+2. **Approximate Algorithms**: Probabilistic data structures for efficiency
+3. **Machine Learning**: Neural networks for semantic understanding
+4. **Real-time Updates**: Incremental index updates as new content appears
+5. **Personalization**: User-specific relevance adjustments
+6. **Context Awareness**: Location, device, and search history influence scoring
+
+The fundamental principle remains the same: **measure how well document content matches user intent**, whether through simple keyword overlap or sophisticated semantic analysis.
+
+This text relevance component (k), combined with authority signals like PageRank (r), creates the foundation of modern web search – turning the vast, unstructured web into a navigable information space.
 ## Computational Complexity and Scale
 
 ### Matrix Operations at Web Scale
