@@ -1,13 +1,13 @@
 # How Google Finds What You're Looking For: PageRank & Linear Algebra
 *A comprehensive mathematical exploration of the algorithm that built the modern web*
 
-PageRank represents one of the most elegant applications of linear algebra to real-world problems, transforming web search from primitive keyword matching into the sophisticated authority-based ranking we rely on today[1][30]. This algorithm, developed by Larry Page and Sergey Brin in 1996, interprets the web as a massive directed graph and applies fundamental theorems from matrix theory to determine page importance[2][30].
+PageRank represents one of the most elegant applications of linear algebra to real-world problems, transforming web search from primitive keyword matching into the sophisticated authority-based ranking we rely on today. This algorithm, developed by Larry Page and Sergey Brin in 1996, interprets the web as a massive directed graph and applies fundamental theorems from matrix theory to determine page importance.
 
 ## The Mathematical Foundation: From Web Graph to Linear System
 
 ### Constructing the Web as a Matrix
 
-The web's hyperlink structure forms a natural directed graph where pages are vertices and links are edges[5][16]. This graph translates directly into mathematical objects through the **adjacency matrix** A, where A[i,j] = 1 if page j links to page i, and 0 otherwise[5][23].
+The web's hyperlink structure forms a natural directed graph where pages are vertices and links are edges. This graph translates directly into mathematical objects through the **adjacency matrix** A, where A[i,j] = 1 if page j links to page i, and 0 otherwise.
 
 For a simple 4-page network where:
 - Page A links to B and C  
@@ -26,11 +26,11 @@ A = [[0, 0, 1, 1],    # Page A receives from C, D
 
 ### The Hyperlink Matrix: Normalizing Transition Probabilities
 
-Raw link counts don't capture relative importance—a page linking to 100 others shouldn't give each the same weight as a page linking to just one[5][9]. The **hyperlink matrix** H addresses this by column-normalizing A:
+Raw link counts don't capture relative importance—a page linking to 100 others shouldn't give each the same weight as a page linking to just one. The **hyperlink matrix** H addresses this by column-normalizing A:
 
 $$H_{ij} = \frac{A_{ij}}{\sum_{k=1}^n A_{kj}}$$
 
-This creates a **column stochastic matrix** where each column sums to 1, representing transition probabilities in a Markov chain[6][18]. In our example:
+This creates a **column stochastic matrix** where each column sums to 1, representing transition probabilities in a Markov chain. In our example:
 
 ```
 H = [[0.0, 0.0, 0.5, 1.0],    # Transition probabilities
@@ -41,7 +41,7 @@ H = [[0.0, 0.0, 0.5, 1.0],    # Transition probabilities
 
 ### The Google Matrix: Ensuring Convergence
 
-The hyperlink matrix H often fails mathematical requirements for guaranteed convergence[16][18]. Two critical problems emerge:
+The hyperlink matrix H often fails mathematical requirements for guaranteed convergence. Two critical problems emerge:
 
 1. **Dangling nodes** (pages with no outlinks) create zero columns
 2. **Disconnected components** prevent irreducibility
@@ -50,7 +50,7 @@ The **Google matrix** G solves both issues through the damping factor modificati
 
 $$G = dH + (1-d)E$$
 
-where d = 0.85 (the damping factor) and E is an n×n matrix with all entries equal to 1/n[14][16][19].
+where d = 0.85 (the damping factor) and E is an n×n matrix with all entries equal to 1/n.
 
 ```python
 import numpy as np
@@ -72,17 +72,17 @@ G = [[0.0375, 0.0375, 0.4625, 0.8875],
 
 ### Formulating the Eigenvector Problem
 
-PageRank seeks a vector r where each component r[i] represents page i's importance[3][6]. The fundamental insight: **PageRank is the principal eigenvector of the Google matrix**[3][11].
+PageRank seeks a vector r where each component r[i] represents page i's importance[3][6]. The fundamental insight: **PageRank is the principal eigenvector of the Google matrix**.
 
 The mathematical relationship:
 
 $$\mathbf{r} = G\mathbf{r}$$
 
-This is the standard eigenvalue problem with λ = 1[6][34]. The Perron-Frobenius theorem guarantees that G has a unique positive eigenvector corresponding to eigenvalue 1, and this eigenvector represents the stationary distribution of the associated Markov chain[5][18][34].
+This is the standard eigenvalue problem with λ = 1. The Perron-Frobenius theorem guarantees that G has a unique positive eigenvector corresponding to eigenvalue 1, and this eigenvector represents the stationary distribution of the associated Markov chain.
 
 ### The Power Method: Iterative Solution
 
-Computing eigenvectors directly for billion-node graphs is computationally prohibitive[33][36]. Instead, PageRank employs the **power method**[11][23]:
+Computing eigenvectors directly for billion-node graphs is computationally prohibitive. Instead, PageRank employs the **power method**:
 
 $$\mathbf{r}^{(k+1)} = G\mathbf{r}^{(k)}$$
 
@@ -108,36 +108,36 @@ For our 4-page example, convergence occurs within ~10 iterations:
 | 5         | 0.3256 | 0.1744 | 0.3256 | 0.1744 |
 | 10        | 0.3246 | 0.1754 | 0.3246 | 0.1754 |
 
-Pages A and C achieve higher rankings due to receiving more authoritative links[20][21].
+Pages A and C achieve higher rankings due to receiving more authoritative links.
 
 ## Mathematical Guarantees: Convergence Theory
 
 ### Perron-Frobenius Theorem Application
 
-The Google matrix G satisfies three crucial properties that guarantee convergence[5][18]:
+The Google matrix G satisfies three crucial properties that guarantee convergence:
 
 1. **Stochastic**: Each column sums to 1
 2. **Irreducible**: Every page can reach every other page  
 3. **Aperiodic**: No fixed-period cycles exist
 
-Under these conditions, the Perron-Frobenius theorem guarantees[5][34]:
+Under these conditions, the Perron-Frobenius theorem guarantees:
 - Unique eigenvalue λ = 1 with multiplicity 1
 - All other eigenvalues satisfy |λᵢ| < 1
 - Unique positive eigenvector (the PageRank vector)
 
 ### Convergence Rate Analysis
 
-The power method's convergence rate depends on the **second-largest eigenvalue** λ₂[11][15]:
+The power method's convergence rate depends on the **second-largest eigenvalue** λ₂:
 
 $$\text{Convergence rate} = \left|\frac{\lambda_2}{\lambda_1}\right| = |\lambda_2|$$
 
-For the Google matrix with damping factor d = 0.85, theoretical analysis shows |λ₂| ≤ 0.85, ensuring rapid convergence[13][15]. In practice, 50-100 iterations achieve sufficient precision for web-scale computation[5][33].
+For the Google matrix with damping factor d = 0.85, theoretical analysis shows |λ₂| ≤ 0.85, ensuring rapid convergence. In practice, 50-100 iterations achieve sufficient precision for web-scale computation.
 
 ## The Damping Factor: Balancing Authority and Democracy
 
 ### Mathematical Interpretation
 
-The damping factor d represents the probability that a random surfer follows links rather than jumping to a random page[14][17]. This creates a balance between:
+The damping factor d represents the probability that a random surfer follows links rather than jumping to a random page. This creates a balance between:
 
 - **Authority flow** (d → 1): Rankings dominated by link structure
 - **Democratic distribution** (d → 0): All pages receive equal importance
@@ -153,7 +153,7 @@ Different damping factors produce measurably different PageRank distributions:
 | 0.85          | 0.3246 | 0.1754 | 0.3246 | 0.1754 |
 | 0.95          | 0.3305 | 0.1695 | 0.3305 | 0.1695 |
 
-Higher damping factors increasingly concentrate authority in well-connected pages[13][15].
+Higher damping factors increasingly concentrate authority in well-connected pages.
 
 ## A Deeper Mathematical Intuition: PageRank as "Probability Flow"
 
@@ -165,7 +165,7 @@ Because the Google matrix \(G = dH + (1-d)E\) simply re-allocates probability wi
 
 Two quick corollaries become transparent in this picture:
 * **Dangling stability** – a page with no out-links contributes *all* of its probability to the teleport pool, preventing masses from disappearing.
-* **Second-eigenvalue speed** – the gap \(1-|\lambda_2|\) measures how fast transient eddies die out; a smaller gap means slower mixing.[14][17]
+* **Second-eigenvalue speed** – the gap \(1-|\lambda_2|\) measures how fast transient eddies die out; a smaller gap means slower mixing.
 
 ---
 
@@ -203,7 +203,7 @@ With damping factor \(d = 0.85\) the power method converges in **20 iterations**
 | 10 | 0.2519 | 0.0970 | 0.1378 | 0.2986 | 0.1898 | 0.0250 |
 | 20 | **0.2527** | **0.0966** | **0.1377** | **0.2976** | **0.1904** | **0.0250** |
 
-**Data Science Blog** (D) rises to the top despite having fewer direct in-links than A because highly ranked nodes repeatedly funnel authority into it — a tangible demonstration of *quality over quantity*.[2][8]
+**Data Science Blog** (D) rises to the top despite having fewer direct in-links than A because highly ranked nodes repeatedly funnel authority into it — a tangible demonstration of *quality over quantity*.
 
 ---
 
@@ -232,13 +232,13 @@ Pure keyword matching would already place **A** first, but PageRank still matter
 | 2 | E | **1.000** | 0.190 | 0.676 |
 | 3 | A | 0.000 | 0.253 | 0.101 |
 
-Here **PageRank is decisive**: pages D and E tie on keywords, but D outranks E thanks to higher incoming trust, reflecting the idea that “who recommends you” beats “how many recommend you.”[18]
+Here **PageRank is decisive**: pages D and E tie on keywords, but D outranks E thanks to higher incoming trust, reflecting the idea that “who recommends you” beats “how many recommend you.”
 
 ---
 
 ## Why This Matters
 
-Even on a six-node toy graph, PageRank captures *global structural signals* that keyword statistics alone cannot.  It rewards pages plugged into reputable neighborhoods and penalizes orphan or spam pages, illustrating **the dual lens of topicality and authority** that underpins modern search[20][22].
+Even on a six-node toy graph, PageRank captures *global structural signals* that keyword statistics alone cannot.  It rewards pages plugged into reputable neighborhoods and penalizes orphan or spam pages, illustrating **the dual lens of topicality and authority** that underpins modern search.
 
 # Calculating Keyword Relevance Scores (k): The Text Matching Component
 
@@ -493,22 +493,22 @@ This text relevance component (k), combined with authority signals like PageRank
 
 ### Matrix Operations at Web Scale
 
-Modern web graphs contain approximately 10¹² pages with ~10 outlinks each[33][36]. This creates:
+Modern web graphs contain approximately 10¹² pages with ~10 outlinks each. This creates:
 - Matrix size: 10¹² × 10¹² entries  
 - Sparse structure: ~10¹³ non-zero entries
 - Memory requirements: Terabytes for full matrix storage
 
 ### Sparse Matrix Optimization
 
-The Google matrix's construction as G = dH + (1-d)E avoids explicit storage of the dense component[19][33]. Instead, the matrix-vector multiplication becomes:
+The Google matrix's construction as G = dH + (1-d)E avoids explicit storage of the dense component. Instead, the matrix-vector multiplication becomes:
 
 $$G\mathbf{r} = d(H\mathbf{r}) + \frac{(1-d)}{n}\mathbf{e}$$
 
-where **e** is the vector of ones. This reduces each iteration from O(n²) to O(10n) operations[11][33].
+where **e** is the vector of ones. This reduces each iteration from O(n²) to O(10n) operations.
 
 ### Production Implementation
 
-Google's production PageRank system achieves remarkable scalability[33]:
+Google's production PageRank system achieves remarkable scalability:
 - 38 billion vertices, 3.1 trillion edges
 - 34.4 seconds per iteration
 - Distributed computation across thousands of machines
@@ -518,15 +518,15 @@ Google's production PageRank system achieves remarkable scalability[33]:
 
 ### Personalized PageRank
 
-The standard formulation extends to **personalized PageRank** by replacing the uniform jump vector with user-specific preferences[12]:
+The standard formulation extends to **personalized PageRank** by replacing the uniform jump vector with user-specific preferences:
 
 $$G = dH + (1-d)\mathbf{v}\mathbf{e}^T$$
 
-where **v** represents personalization weights, enabling topic-specific rankings[32].
+where **v** represents personalization weights, enabling topic-specific rankings.
 
 ### Matrix Analysis Properties
 
-The Google matrix exhibits fascinating spectral properties[6][11]:
+The Google matrix exhibits fascinating spectral properties:
 - **Spectral radius**: ρ(G) = 1
 - **Condition number**: Well-conditioned due to damping
 - **Rank**: Full rank (irreducible construction)
@@ -534,34 +534,34 @@ The Google matrix exhibits fascinating spectral properties[6][11]:
 
 ### Sensitivity Analysis
 
-PageRank demonstrates robust stability under small perturbations[13]. The algorithm's mathematical structure ensures that minor changes in link structure produce proportionally small changes in rankings, critical for handling the web's dynamic nature[29].
+PageRank demonstrates robust stability under small perturbations. The algorithm's mathematical structure ensures that minor changes in link structure produce proportionally small changes in rankings, critical for handling the web's dynamic nature.
 
 ## Real-World Extensions Beyond Web Search
 
 ### Citation Networks  
 
-Academic papers form directed graphs through citations, enabling PageRank-based impact metrics[30]. The h-index and other bibliometrics pale beside eigenvector centrality measures for identifying influential research[11].
+Academic papers form directed graphs through citations, enabling PageRank-based impact metrics. The h-index and other bibliometrics pale beside eigenvector centrality measures for identifying influential research.
 
 ### Social Network Analysis
 
-Social media platforms employ PageRank variants to identify influential users and content[30]. Twitter's original "Who to Follow" algorithm directly implemented personalized PageRank with user interaction graphs[32].
+Social media platforms employ PageRank variants to identify influential users and content. Twitter's original "Who to Follow" algorithm directly implemented personalized PageRank with user interaction graphs.
 
 ### Recommendation Systems
 
-Netflix, Amazon, and Spotify use PageRank principles to identify "influential" users whose preferences predict broader appeal[30]. These systems construct bipartite graphs connecting users to content, then apply PageRank to both node types[32].
+Netflix, Amazon, and Spotify use PageRank principles to identify "influential" users whose preferences predict broader appeal. These systems construct bipartite graphs connecting users to content, then apply PageRank to both node types.
 
 ## The Algorithm That Built Modern Search
 
-PageRank's mathematical elegance transformed web search from keyword matching to authority-based ranking[1][30]. The algorithm's success stems from its theoretical foundations:
+PageRank's mathematical elegance transformed web search from keyword matching to authority-based ranking. The algorithm's success stems from its theoretical foundations:
 
 1. **Rigorous convergence guarantees** via Perron-Frobenius theory
 2. **Efficient computation** through sparse matrix methods  
 3. **Robust behavior** under web-scale perturbations
 4. **Intuitive interpretation** as random surfer stationary distribution
 
-While Google's current ranking algorithm incorporates hundreds of factors beyond PageRank, the fundamental insight—that link structure reveals authority—remains central to modern information retrieval[29][30]. The mathematical framework pioneered by Page and Brin continues to influence everything from social network analysis to recommendation systems, demonstrating the profound impact of applying rigorous linear algebra to real-world problems[30][32].
+While Google's current ranking algorithm incorporates hundreds of factors beyond PageRank, the fundamental insight—that link structure reveals authority—remains central to modern information retrieval. The mathematical framework pioneered by Page and Brin continues to influence everything from social network analysis to recommendation systems, demonstrating the profound impact of applying rigorous linear algebra to real-world problems.
 
-The beauty of PageRank lies not in its computational complexity, but in its mathematical simplicity: the most important pages are those deemed important by other important pages, expressed through the elegant language of eigenvectors and Markov chains[3][6]. This recursive definition, seemingly circular in natural language, finds precise mathematical expression through matrix theory—a testament to the power of linear algebra in solving complex, real-world problems[5][11].
+The beauty of PageRank lies not in its computational complexity, but in its mathematical simplicity: the most important pages are those deemed important by other important pages, expressed through the elegant language of eigenvectors and Markov chains. This recursive definition, seemingly circular in natural language, finds precise mathematical expression through matrix theory—a testament to the power of linear algebra in solving complex, real-world problems.
 
 ## Implementation Code Example
 
@@ -617,7 +617,7 @@ pagerank_scores = pagerank(A)
 print("PageRank scores:", pagerank_scores)
 ```
 
-This mathematical exploration reveals PageRank as far more than a search algorithm—it represents a fundamental breakthrough in using linear algebra to extract meaning from network structure, with applications spanning academic citation analysis to social media influence measurement[30][32]. The algorithm's enduring relevance demonstrates the power of mathematical theory in solving complex computational challenges at unprecedented scale[33][36].
+This mathematical exploration reveals PageRank as far more than a search algorithm—it represents a fundamental breakthrough in using linear algebra to extract meaning from network structure, with applications spanning academic citation analysis to social media influence measurement[30][32]. The algorithm's enduring relevance demonstrates the power of mathematical theory in solving complex computational challenges at unprecedented scale.
 
 ## References
 
